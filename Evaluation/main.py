@@ -9,6 +9,7 @@ import os
 import json
 import unicodedata
 from tabulate import tabulate
+from collections import defaultdict
 
 import sys
 sys.path.append('..')
@@ -102,8 +103,8 @@ if __name__ == "__main__":
 
     for bb in bbs:
 
-        if bb != "chennai":
-            continue
+        '''if bb != "chennai":
+            continue'''
 
         init_using_elasticindex(bbs[bb])
 
@@ -135,7 +136,7 @@ if __name__ == "__main__":
                     #print tweet_text
                     lnex_lns = set([x[1] for x in lnex.extract(tweet_text)])
 
-            #print tweet_lns, [tweet_text[x[0]:x[1]] for x in tweet_lns]
+            #print tweet_lns, [tweet_text[x[0][0]:x[0][1]] for x in tweet_lns]
             #print lnex_lns, [tweet_text[x[0]:x[1]] for x in lnex_lns]
 
             # The location names of type outLoc and ambLoc that the tools
@@ -186,6 +187,10 @@ if __name__ == "__main__":
             FNs = tweet_lns - lnex_lns
             FNs_count += len(FNs)
 
+            ####################################################################
+            #print TPs_count, FPs_count, FNs_count, overlaps_count
+            #print "#"*100
+
         '''
         since we add 2 lns one from lnex_lns and one from tweet_lns if they
         overlap the equation of counting those as 1/2 FPs and 1/2 FNs is going
@@ -199,4 +204,4 @@ if __name__ == "__main__":
         Recall = TPs_count/(TPs_count + FNs_count + .5 * .5 * overlaps_count)
         F_Score = (2 * Precision * Recall)/(Precision + Recall)
 
-        print bb, Precision, Recall, F_Score
+        print "\t".join([bb, str(Precision), str(Recall), str(F_Score)])

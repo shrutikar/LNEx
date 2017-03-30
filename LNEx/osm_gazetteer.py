@@ -189,11 +189,16 @@ def build_bb_gazetteer(bb, augment=True):
             gaz_augmentation_and_filtering.augment(geo_locations)
 
     else:
-        new_geo_locations = \
-            gaz_augmentation_and_filtering.filter_geo_locations(geo_locations)
-        extended_words3 = \
-            gaz_augmentation_and_filtering.get_extended_words3(
-                new_geo_locations.keys())
+        # Augmentation will mean filtering and augmentation again to be
+        #   consistent with the IJCAI paper.
+        #new_geo_locations = \
+        #    gaz_augmentation_and_filtering.filter_geo_locations(geo_locations)
+
+        new_geo_locations =  {x.lower():set(geo_locations[x])
+                                for x in geo_locations}
+
+        extended_words3 = gaz_augmentation_and_filtering.get_extended_words3(
+                            new_geo_locations.keys())
 
     return new_geo_locations, geo_info, extended_words3
 
