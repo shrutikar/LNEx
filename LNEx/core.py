@@ -708,10 +708,15 @@ def remove_non_full_mentions(filtered_n_grams, valid_ngrams, query_tokens):
                             # get the indecies from the original query tokens
                             for query_token in query_tokens:
 
-                                print query_token
+                                # TODO: check in the old code why empty tuples
+                                #   are not removed
+                                # if it is an empty tuple.. skip
+                                if query_token == tuple():
+                                    continue
 
                                 # NOTE: apparently at the time of development
-                                # and testing I had a good reason for having the                                 # first two conditions. They can be removed
+                                # and testing I had a good reason for having the
+                                # first two conditions. They can be removed
                                 # in the future.
                                 if ngram_min_range <= query_token[1] and \
                                    ngram_max_range >= query_token[2] and \
