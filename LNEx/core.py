@@ -405,6 +405,10 @@ def extract(tweet):
         sub_query_tokens = sub_query["tokens"]
         sub_query_offsets = sub_query["offsets"]
 
+        # ignore splits of size 0
+        if len(sub_query_tokens) == 0:
+            continue
+
         # expand tokens in sub_query_tokens to vectors
         for idx, token in enumerate(sub_query_tokens): # ---------------- for II
 
@@ -703,6 +707,8 @@ def remove_non_full_mentions(filtered_n_grams, valid_ngrams, query_tokens):
 
                             # get the indecies from the original query tokens
                             for query_token in query_tokens:
+
+                                print query_token
 
                                 # NOTE: apparently at the time of development
                                 # and testing I had a good reason for having the                                 # first two conditions. They can be removed
