@@ -6,6 +6,7 @@ v3.0 License.
 #############################################################################"""
 
 from collections import defaultdict
+import unicodedata
 
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
@@ -100,36 +101,44 @@ def search_index(bb):
 
 ################################################################################
 
-def extract_text(obj):
-    '''Extracts a location name from the different json fields in order
-    giving the priority to (en) then (default), and so on. '''
+def strip_non_ascii(s):
+    if isinstance(s, unicode):
+        nfkd = unicodedata.normalize('NFKD', s)
+        return str(nfkd.encode('ASCII', 'ignore').decode('ASCII'))
+    else:
+        return s
 
+################################################################################
+
+def extract_names(obj):
+    '''Extracts a location name from the different json fields in order
+    giving the priority to (en) then (default), and so on.
+
+    Acceptable keys for each json object -----------------------
+        city	default	en
+        state	default	en
+        street	default	en
+        name	alt	default	en	int	loc	old	reg
+        country	default	en
+        '''
+
+    accepted_keys = ['default', 'en', 'alt', 'int', 'loc', 'old', 'reg']
 
     keys = dir(obj)
+    result = list()
 
+    # if there is only one key in the json object, return its value
     if len(keys) == 1:
-        return obj[keys[0]]
+        name = strip_non_ascii(obj[keys[0]])
+        result.append(name)
 
     else:
-        if "en" in keys:
-            return obj["en"]
-        elif "default" in keys:
-            return obj["default"]
-        elif "reg" in keys:
-            return obj["reg"]
-        elif "old" in keys:
-            return obj["old"]
-        elif "alt" in keys:
-            return obj["alt"]
-        elif "loc" in keys:
-            return obj["loc"]
-        elif "int" in keys:
-            return obj["int"]
-        else:
-            try:
-                return obj[keys[0]]
-            except BaseException:
-                return obj
+        for key in keys:
+            if key in accepted_keys:
+                name = strip_non_ascii(obj[key])
+                result.append(name)
+
+    return result
 
 ################################################################################
 
@@ -166,21 +175,22 @@ def build_bb_gazetteer(bb, augment=True):
             if key in location_fields:
 
                 try:
-                    text = extract_text(match[key])
 
-                    if key == "name":
-                        # mapping a location name to its geo-info
-                        geo_locations[text].append(_id)
+                    for name in extract_names(match[key]):
 
-                        geo_info[_id] = {"name": text,
-                                        "geo_item": geo_item}
+                        if key == "name":
 
-                    else:
-                        geo_locations[text] = list()
+                            # mapping a location name to its geo-info
+                            geo_locations[name].append(_id)
+
+                            geo_info[_id] = { "name": name,
+                                              "geo_item": geo_item }
+
+                        else:
+                            geo_locations[name] = list()
 
                 except BaseException:
-                    print "exception at record # ", count
-                    print extract_text(match[key])
+                    print "extracting names is causing an error"
                     raise
 
     if augment:

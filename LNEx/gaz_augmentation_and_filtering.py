@@ -6,7 +6,6 @@ v3.0 License.
 #############################################################################"""
 
 import re, os
-import unicodedata
 from itertools import groupby
 from operator import itemgetter
 from collections import defaultdict
@@ -298,10 +297,7 @@ def filter_geo_locations(geo_locations):
 
         for name in names:
 
-            name = unicodedata.normalize(
-                'NFKD', name).encode(
-                'ascii', 'ignore')
-            name = str(name.strip())
+            name = name.strip()
 
             # skip empty names
             if name == "" or name.isdigit() or name in gaz_stopwords or len(name) < 3:
@@ -378,8 +374,8 @@ def augment(geo_locations):
 
         nospaces = name.replace(" ", "")
 
-        if name not in list_tops_to_remove and len(
-                nospaces) > 2 and not nospaces.isdigit():
+        if name not in list_tops_to_remove and \
+           len(nospaces) > 2 and not nospaces.isdigit():
 
             # remove all non-alphaneumeric characters
             alphanumeric_name = re.sub(r'\W+', ' ', name)

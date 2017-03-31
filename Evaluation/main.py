@@ -89,7 +89,7 @@ def init_using_elasticindex(bb):
 
     lnex.elasticindex(conn_string='130.108.85.186:9200', index_name="photon_v1")
 
-    return lnex.initialize(bb, augment=False)
+    return lnex.initialize(bb, augment=True)
 
 ################################################################################
 
@@ -103,8 +103,8 @@ if __name__ == "__main__":
 
     for bb in bbs:
 
-        '''if bb != "chennai":
-            continue'''
+        if bb != "chennai":
+            continue
 
         init_using_elasticindex(bbs[bb])
 
