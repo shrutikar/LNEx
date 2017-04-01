@@ -103,8 +103,8 @@ if __name__ == "__main__":
 
     for bb in bbs:
 
-        if bb != "chennai":
-            continue
+        '''if bb != "chennai":
+            continue'''
 
         init_using_elasticindex(bbs[bb])
 
@@ -118,6 +118,8 @@ if __name__ == "__main__":
         FPs_count = .0
         FNs_count = .0
         overlaps_count = 0
+
+        fns = defaultdict(int)
 
         for key in anns:
 
@@ -187,6 +189,10 @@ if __name__ == "__main__":
             FNs = tweet_lns - lnex_lns
             FNs_count += len(FNs)
 
+            '''if len(FNs) > 0:
+                for x in [tweet_text[x[0]:x[1]] for x in FNs]:
+                    fns[x.lower()] += 1'''
+
             ####################################################################
             #print TPs_count, FPs_count, FNs_count, overlaps_count
             #print "#"*100
@@ -198,10 +204,11 @@ if __name__ == "__main__":
             overlaps_count x
                 1/2 (since we count twice) x
                     1/2 (since we want 1/2 of all the errors made)
-
         '''
         Precision = TPs_count/(TPs_count + FPs_count + .5 * .5 * overlaps_count)
         Recall = TPs_count/(TPs_count + FNs_count + .5 * .5 * overlaps_count)
         F_Score = (2 * Precision * Recall)/(Precision + Recall)
 
         print "\t".join([bb, str(Precision), str(Recall), str(F_Score)])
+
+        #print json.dumps(fns)

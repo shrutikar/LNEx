@@ -311,7 +311,39 @@ def filter_geo_locations(geo_locations):
 
 ################################################################################
 
-def augment(geo_locations):
+def aug_using_category_ellipses(geo_locations, geo_info):
+
+    new_geo_locations = {}
+    new_geo_locations.update(geo_locations)
+
+    for geo_location in geo_locations:
+
+        for id in geo_locations[geo_location]:
+
+            osm_value = geo_info[id]['osm_value'].lower()
+
+            osm_value = osm_value.replace("_", " ")
+
+            osm_values = re.split('; |, |\*|\n', osm_value)
+            osm_values = [x for x in osm_values if len(x) > 2]
+
+            for osm_value in osm_values:
+                if osm_value not in geo_location:
+                    # attach the category/osm_value to the LN
+                    new_geo_location = geo_location + " " + osm_value
+                else:
+                    # remove the category/osm_value from the LN
+                    new_geo_location = geo_location.replace(osm_value, '')
+
+                if len(new_geo_location) > 2 and \
+                   new_geo_location not in new_geo_locations:
+                    new_geo_locations[new_geo_location] = geo_locations[geo_location]
+
+    return new_geo_locations
+
+################################################################################
+
+def augment(geo_locations, geo_info):
     '''Augments the location names using skip grams'''
 
     # augmentation includes filtering
@@ -438,5 +470,9 @@ def augment(geo_locations):
                 # not in the list of names before augmentation
                 if new_name not in lns:
                     new_geo_locations[new_name] |= set(new_geo_locations[name])
+
+    ############################################################################
+
+    #new_geo_locations = aug_using_category_ellipses(new_geo_locations, geo_info)
 
     return new_geo_locations, get_extended_words3(new_geo_locations.keys())

@@ -183,8 +183,11 @@ def build_bb_gazetteer(bb, augment=True):
                             # mapping a location name to its geo-info
                             geo_locations[name].append(_id)
 
+                            osm_value = match["osm_value"].lower()
+
                             geo_info[_id] = { "name": name,
-                                              "geo_item": geo_item }
+                                              "geo_item": geo_item ,
+                                              "osm_value": osm_value}
 
                         else:
                             geo_locations[name] = list()
@@ -196,7 +199,7 @@ def build_bb_gazetteer(bb, augment=True):
     if augment:
         # 'pullapuram road': set([493])
         new_geo_locations, extended_words3 = \
-            gaz_augmentation_and_filtering.augment(geo_locations)
+            gaz_augmentation_and_filtering.augment(geo_locations, geo_info)
 
     else:
         # Augmentation will mean filtering and augmentation again to be

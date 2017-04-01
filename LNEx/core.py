@@ -118,9 +118,6 @@ def preprocess_tweet(tweet):
     # additional preprocessing
     tweet = tweet.replace("\n", " ").replace(" https", "").replace("http", "")
 
-    # remove all mentions
-    tweet = re.sub(r"@\w+", "", tweet)
-
     # extract hashtags to break them -------------------------------------------
     hashtags = re.findall(r"#\w+", tweet)
 
@@ -322,6 +319,26 @@ def align_and_split(raw_string, preprocessed_string):
     return tokens
 
 ################################################################################
+'''
+NOTE: This is talking care of some of the errors caused by the aligment
+      function. Example error: @chennairains #chennairainshelp
+      > when extracting chennai from the hashtag the alignment function is
+        getting the indexes of chennai from the mention that precedes it.
+
+        tweet: 'Update:Water level in Sai Nagar,Thoraipakam is above the shoulder. Boats needed to rescue people from there @ChennaiRains #ChennaiRainsHelp'
+'''
+def remove_mentions(tweet):
+
+    # remove all mentions
+    mentions = re.findall(r"(?<=^|(?<=[^a-zA-Z0-9-_\.]))@([A-Za-z]+[A-Za-z0-9]+)", tweet)
+
+    for mention in mentions:
+        mention = "@"+mention
+        tweet = tweet.replace(mention, "#"*len(mention))
+
+    return tweet
+
+################################################################################
 ################################################################################
 
 def extract(tweet):
@@ -356,6 +373,8 @@ def extract(tweet):
 
     # we will call a tweet from now onwards a query
     query = str(tweet.lower())
+
+    query = remove_mentions(query)
 
     preprocessed_query = preprocess_tweet(query)
 
@@ -808,7 +827,7 @@ class init_Env(object):
 def initialize(geo_locations, extended_words3):
     '''Initializing the system here'''
 
-    print "Initializing LNEx ..."
+    #print "Initializing LNEx ..."
     g_env = init_Env(geo_locations, extended_words3)
     set_global_env(g_env)
-    print "Done Initialization ..."
+    #print "Done Initialization ..."
