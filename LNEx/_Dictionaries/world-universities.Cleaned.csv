@@ -1,12 +1,12 @@
 University Name,University Acronym
 "New York University, Abu Dhabi",nyuad
 "Rochester Institute of Technology, Dubai",dubai rit
-Universität für angewandte Kunst Wien,ns2
+Universität für angewandte Kunst Wien,dieangewandte
 Azerbaijan State Oil Academy,adna
 "Academy of Music, Dance and Fine Arts",amti
 Hope Africa University,hopeafricauniversity
-Universidade de Itaúna,web
-Academy of the Ministry of Internal Affairs of the Republic of Belarus,academy
+Universidade de Itaúna,uit
+Academy of the Ministry of Internal Affairs of the Republic of Belarus,mia
 Mogilev State University A.A. Kuleshov,msu
 "Victoria University Toronto, University of Toronto",vicu
 Nankai University,nku
@@ -50,7 +50,7 @@ Sri Venkateswara University,svuni
 Tamil Nadu Agricultural University,dbs
 "University of Agricultural Sciences, Bangalore",uasbng
 University of Calicut,unical
-University of Health Sciences Andhra Pradesh,59
+University of Health Sciences Andhra Pradesh,ntruhs
 University of Kashmir,kashmiruniversity
 VBS Purvanchal University,vbspu
 British Royal University,broyalu
@@ -67,16 +67,16 @@ Darul Ulum Islamic College,kidu-darululum
 "Newcastle University, Medicine Malaysia ",numed
 Universiti Kuala Lumpur Malaysian Institute of Information Technology (MIIT),miit
 Université Abdou Moumouni de Niamey,uam
-Bowen University,bowenuniversity-edu
+Bowen University,bowenuniversity
 "Federal Polytechnic Bauchi, Nigeria",fptb
 Saxion Universities,saxion
 National Academy of Fine Arts,ska
 Leyte Normal University,lnu
 University of the Immaculate Conception,uic
 Baqai Medical University,baqai
-"Fine Arts Academy ""Jan Matejko"" in Cracow",149
+Jan Matejko Academy of Fine Arts,149
 Higher School o Business in Tarnow,wsb
-"Universidad de Puerto Rico, Ponce",upr-ponce
+"Universidad de Puerto Rico, Ponce",asp.krakow
 Astrahan State Medical Academy,agma
 Cheljabinsk State Institute of Teacher Training,cspi
 Ivanovo State Academy of Medicine,isma
@@ -93,7 +93,7 @@ Smolensk Humanitarian University,shu
 St. Petersburg Repin State Academic Institute of Painting Sculpture and Achitecture,artacademy
 Syktyvkar State University,ssu
 Tuva State University,tuvsu
-Tver State University,university
+Tver State University,tversu
 Ukhta State Technical University,uii
 College of Technology at Kharj,kct
 "Fourah Bay College, University of Sierra Leone",fbcusl
@@ -111,14 +111,14 @@ American Conservatory of Music,members
 California University of Management and Sciences,cauniversity
 City University of New York Medical School / Sophie Davis School of Biomedical Education,med
 Community College of Denver,ccd
-"Concordia College, Selma",higher-ed
+Concordia College Alabama,ccal
 Eastern Conservatory of Music,easternconservatory-music
 Goldey-Beacom College,goldey
-Judson College Marion,home
-Madonna University,madonna2
+Judson Female College,judson
+Madonna University,madonna
 Marymount Manhattan College,marymount
-Oklahoma State University Center for Health Sciences,osu
-Puget Sound Christian College,members
+Oklahoma State University Center for Health Sciences,okstate
+Puget Sound Christian College,pscc
 "Rutgers, The State University of New Jersey - Newark",rutgers-newark
 Sinte Gleska University,sinte
 Skadron College,skadron
@@ -237,8 +237,8 @@ Yerevan Haibusak University,haybusak
 Yerevan State Medical University,ysmu
 Yerevan State University,ysu
 "American University of the Caribbean, Sint Maarten",aucmed
-International University School of Medicine (IUSOM),internationaluniversity-schoolofmedicine
-"St.James's School of Medicine, Bonaire",sjsm
+International University School Of Medicine,iusom
+Saint James School of Medicine,sjsm
 University of Sint Eustatius School of Medicine,eustatiusmed
 "University of the Netherlands Antilles, Curacao",una
 Universidade Católica de Angola,ucan
@@ -249,7 +249,7 @@ Universidade Metodista de Angola,uma
 Universidade Metropolitana de Angola,unimetroangola
 Universidade Tecnica de Angola,utanga
 Univesidade Agostinho Neto,uan
-Instituto de Enseñanza Superior del Ejército,iese
+Higher Education Army Institute,iese
 "Instituto Nacional de Educación Física ""General Manuel Belgrano""",unlu
 Instituto Tecnológico de Buenos Aires,itba
 Instituto Universitario Aeronáutico,iua
@@ -344,7 +344,7 @@ Fachhochschule für Bank- und Finanzwirtschaft,fh-vie
 Fachhochschule JOANNEUM,fh-joanneum
 Fachhochschule Kärnten,fh-kaernten
 Fachhochschule Krems,fh-krems
-Fachhochschule Kufstein (Tirol),fh-kufstein
+University of Applied Sciences Kufstein,fh-kufstein
 Fachhochschule Salzburg,fh-sbg
 Fachhochschule St. Pölten,fh-stpoelten
 Fachhochschule Vorarlberg,fhv

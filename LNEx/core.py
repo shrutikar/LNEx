@@ -824,6 +824,98 @@ class init_Env(object):
 
 ################################################################################
 
+class init_Env_Files(object):
+    '''Where all the gazetteer data, dictionaries and language model resides'''
+
+    def __init__(self, gaz_name, gaz_comb_name):
+        '''Initialized the system using the location names and list of english
+        words (words3)'''
+
+        data_dir = '/home/hussein/code/github/LNEx/_Data/CombinedAugmentedGazetteers/'
+
+        ###################################################
+        # OSM abbr dictionary
+        ###################################################
+
+        dicts_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                        "_Dictionaries/")
+
+        fname = dicts_dir + "osm_abbreviations.csv"
+
+        # read lines to list
+        with open(fname) as f:
+            lines = f.read().splitlines()
+
+        self.osm_abbreviations = defaultdict(list)
+
+        for x in lines:
+            line = x.split(",")
+
+            # apartments > apts
+            self.osm_abbreviations[line[0]].append(line[1])
+            # apartments > apts.
+            self.osm_abbreviations[line[0]].append(line[1] + ".")
+
+            # apts > apartments
+            self.osm_abbreviations[line[1]].append(line[0])
+            # apts. > apartments
+            self.osm_abbreviations[line[1] + "."].append(line[0])
+
+        ########################################################################
+
+        combined_unique_names_file = data_dir + gaz_name + "_language_model_"+ \
+                                    gaz_comb_name+"_unique_names_augmented.json"
+
+        with open(combined_unique_names_file) as data_file:
+            self.gazetteer_unique_names = json.load(data_file)
+
+        if "" in self.gazetteer_unique_names:
+            self.gazetteer_unique_names.pop("", None)
+
+        # since geo_loc has the geo_info in an array and in this old code we
+        #   don't have geo_info, I am adding dummy values in an array for the
+        #   same length of the geo_info
+        self.gazetteer_unique_names = {x:[1]*self.gazetteer_unique_names[x]
+                                        for x in self.gazetteer_unique_names}
+
+        self.gazetteer_unique_names_set = \
+                    set(self.gazetteer_unique_names.keys())
+
+        # NOTE BLACKLIST CODE GOES HERE
+
+        # this list has all the english words in addition to the names
+        # from the combined gazetteer, any word not in the list is
+        # considered misspilled.
+
+        fname = data_dir+gaz_name+"_"+gaz_comb_name+"_words3_extended.txt"
+        with open(fname) as f:
+
+            self.extended_words3 = f.read().splitlines()
+            self.extended_words3 = set(self.extended_words3)
+
+        ########################################################################
+
+        streets_suffixes_dict_file = dicts_dir + "streets_suffixes_dict.json"
+
+        with open(streets_suffixes_dict_file) as f:
+
+            self.streets_suffixes_dict = json.load(f)
+
+        ########################################################################
+
+        # gazetteer-based language model
+        self.glm = Language_Modeling.GazBasedModel(self.gazetteer_unique_names)
+
+        ########################################################################
+
+        # list of unigrams
+        unigrams = self.glm.unigrams["words"].keys()
+
+        self.stopwords_notin_gazetteer = set(
+            self.extended_words3) - set(unigrams)
+
+################################################################################
+
 def initialize(geo_locations, extended_words3):
     '''Initializing the system here'''
 
@@ -831,3 +923,164 @@ def initialize(geo_locations, extended_words3):
     g_env = init_Env(geo_locations, extended_words3)
     set_global_env(g_env)
     #print "Done Initialization ..."
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+# Multi combination evaluation code below
+################################################################################
+################################################################################
+
+def findOccurences(s, ch):
+    return [i for i, letter in enumerate(s) if letter == ch]
+
+def get_gaz_combinations():
+
+    data_dir = '/home/hussein/code/github/LNEx/_Data/CombinedAugmentedGazetteers/'
+
+    gaz_combs = set()
+
+    for root, dirs,files in os.walk(data_dir, topdown=True):
+        for name in files:
+
+            if "words3_extended" in name or "foursquare" in name:
+                continue
+
+            filename = os.path.join(root, name)
+
+            indexes = findOccurences(filename, "_")
+
+            gaz_comb = filename[indexes[3]+1:indexes[4]]
+
+            gaz_combs.add(gaz_comb)
+
+    return gaz_combs
+
+def read_annotations(gaz_name):
+    gaz_name += "_annotations.json"
+    filename = "/home/hussein/code/github/LNEx/_Data/Brat_Annotations/"+gaz_name
+
+    # read tweets from file to list
+    with open(filename) as f:
+        data = json.load(f)
+
+    return data
+
+def run_multicomb_evaluations():
+
+    gaz_names = ["louisiana"]
+    gaz_combs = get_gaz_combinations()#["wikipedia"]
+
+    for gaz_name in gaz_names:
+
+        anns = read_annotations(gaz_name)
+
+        for gaz_comb in gaz_combs:
+
+            # init environment using gaz combination ###########################
+            g_env = init_Env_Files(gaz_name, gaz_comb)
+            set_global_env(g_env)
+            ####################################################################
+
+            TPs_count = .0
+            FPs_count = .0
+            FNs_count = .0
+            overlaps_count = 0
+
+            fns = defaultdict(int)
+
+            for key in anns:
+
+                tweet_lns = set()
+                lnex_lns = set()
+                tweet_text = ""
+
+                for ann in anns[key]:
+                    if ann != "text":
+                        ln = anns[key][ann]
+
+                        tweet_lns.add(((int(ln['start_idx']),
+                                        int(ln['end_idx'])),
+                                        ln['type']))
+                    else:
+                        tweet_text = anns[key][ann]
+                        #print tweet_text
+                        lnex_lns = set([x[1] for x in extract(tweet_text)])
+
+                # The location names of type outLoc and ambLoc that the tools
+                #   should've not extracted them
+                tweet_lns_not_inLocs = set([x[0] for x in tweet_lns
+                                                if x[1] != 'inLoc'])
+                # add all lns than are of types other than inLoc as FPs
+                FPs_count += len(lnex_lns & tweet_lns_not_inLocs)
+
+                # remove LNs that are not inLoc
+                tweet_lns = set([x[0] for x in tweet_lns]) - tweet_lns_not_inLocs
+                lnex_lns -= tweet_lns_not_inLocs
+
+                # True Positives +++++++++++++++++++++++++++++++++++++++++++++++
+                TPs = tweet_lns & lnex_lns
+
+                TPs_count += len(TPs)
+
+                # Left in both sets ++++++++++++++++++++++++++++++++++++++++++++
+                tweet_lns -= TPs
+                lnex_lns -= TPs
+
+                # Find Overlapping LNs to be counted as 1/2 FPs and 1/2 FNs++
+                overlaps = set()
+                for x in tweet_lns:
+                    for y in lnex_lns:
+                        if do_they_overlap(x, y):
+                            overlaps.add(x)
+                            overlaps.add(y)
+
+                # count all overlapping extractions with non-inLoc as FPs
+                FPs_count += len(overlaps & tweet_lns_not_inLocs)
+
+                # count the number of overlaps that are of type inLoc as 1/2s
+                overlaps = overlaps - tweet_lns_not_inLocs
+                overlaps_count += len(overlaps)
+
+                # remove the overlapping lns from lnex_lns and tweet_lns
+                lnex_lns -= overlaps
+                tweet_lns -= overlaps
+
+                # False Positives ++++++++++++++++++++++++++++++++++++++++++++++
+                # lnex_lns = all - (TPs and overlaps and !inLoc)
+                FPs = lnex_lns - tweet_lns
+                FPs_count += len(FPs)
+
+                # False Negatives ++++++++++++++++++++++++++++++++++++++++++++++
+                FNs = tweet_lns - lnex_lns
+                FNs_count += len(FNs)
+
+                '''if len(FNs) > 0:
+                    for x in [tweet_text[x[0]:x[1]] for x in FNs]:
+                        fns[x.lower()] += 1'''
+
+                ################################################################
+                #print TPs_count, FPs_count, FNs_count, overlaps_count
+                #print "#"*100
+
+            '''
+            since we add 2 lns one from lnex_lns and one from tweet_lns if they
+            overlap the equation of counting those as 1/2 FPs and 1/2 FNs is
+            going to be:
+                overlaps_count x
+                    1/2 (since we count twice) x
+                        1/2 (since we want 1/2 of all the errors made)
+            '''
+            Precision = TPs_count/(TPs_count + FPs_count + \
+                            .5 * .5 * overlaps_count)
+            Recall = TPs_count/(TPs_count + FNs_count + \
+                            .5 * .5 * overlaps_count)
+            F_Score = (2 * Precision * Recall)/(Precision + Recall)
+
+            print "\t".join([gaz_comb, str(Precision),
+                                str(Recall), str(F_Score)])
+
+if __name__ == "__main__":
+    run_multicomb_evaluations()

@@ -1,5 +1,6 @@
 # Data
 _Data/Brat_Annotations
+_Data/CombinedAugmentedGazetteers
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

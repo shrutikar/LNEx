@@ -313,6 +313,8 @@ def filter_geo_locations(geo_locations):
 
 def aug_using_category_ellipses(geo_locations, geo_info):
 
+    geo_locations = {x.lower():geo_locations[x] for x in geo_locations}
+
     new_geo_locations = {}
     new_geo_locations.update(geo_locations)
 
@@ -346,8 +348,20 @@ def aug_using_category_ellipses(geo_locations, geo_info):
 def augment(geo_locations, geo_info):
     '''Augments the location names using skip grams'''
 
+
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
     # augmentation includes filtering
     new_geo_locations = filter_geo_locations(geo_locations)
+
+    '''
+    return new_geo_locations, get_extended_words3(new_geo_locations.keys())
+
+    new_geo_locations = aug_using_category_ellipses(new_geo_locations, geo_info)
+    return new_geo_locations, get_extended_words3(new_geo_locations.keys())
+
+    new_geo_locations = defaultdict(set)
+    new_geo_locations.update({x.lower():geo_locations[x] for x in geo_locations})'''
 
     # step 2 (Augmentation) ++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -413,7 +427,8 @@ def augment(geo_locations, geo_info):
             alphanumeric_name = re.sub(r'\W+', ' ', name)
             alphanumeric_name = alphanumeric_name.strip()
 
-            if alphanumeric_name != name and alphanumeric_name not in gaz_stopwords:
+            if  alphanumeric_name != name and \
+                alphanumeric_name not in gaz_stopwords:
 
                 # not in the list of names before augmentation
                 if alphanumeric_name not in lns:
@@ -472,7 +487,5 @@ def augment(geo_locations, geo_info):
                     new_geo_locations[new_name] |= set(new_geo_locations[name])
 
     ############################################################################
-
-    #new_geo_locations = aug_using_category_ellipses(new_geo_locations, geo_info)
 
     return new_geo_locations, get_extended_words3(new_geo_locations.keys())

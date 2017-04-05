@@ -121,7 +121,15 @@ if __name__ == "__main__":
 
         fns = defaultdict(int)
 
+        count = 0
+
         for key in anns:
+
+            count += 1
+
+            # skip the development set
+            if bb != "houston" and count < 500:
+                continue
 
             tweet_lns = set()
             lnex_lns = set()
