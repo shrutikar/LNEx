@@ -9,11 +9,13 @@ import os
 import json
 import unicodedata
 from tabulate import tabulate
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 import sys
 sys.path.append('..')
 import LNEx as lnex
+
+import operator
 
 ################################################################################
 ################################################################################
@@ -122,6 +124,9 @@ if __name__ == "__main__":
         fns = defaultdict(int)
 
         count = 0
+        one_geolocation = .0
+        all_geolocation = .0
+        geo_codes_length_dist = defaultdict(int)
 
         for key in anns:
 
@@ -144,7 +149,23 @@ if __name__ == "__main__":
                 else:
                     tweet_text = anns[key][ann]
                     #print tweet_text
-                    lnex_lns = set([x[1] for x in lnex.extract(tweet_text)])
+
+                    r = lnex.extract(tweet_text)
+
+                    # how many are already disambiguated +++++++++++++++++++++++
+                    for res in r:
+                        if len(res[3]) < 2:
+                            one_geolocation += 1
+
+                            #if len(res[3]) == 0:
+                                #print res[2]
+                        else:
+                            geo_codes_length_dist[len(res[3])] += 1
+
+                        all_geolocation += 1
+                    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+                    lnex_lns = set([x[1] for x in r])
 
             #print tweet_lns, [tweet_text[x[0][0]:x[0][1]] for x in tweet_lns]
             #print lnex_lns, [tweet_text[x[0]:x[1]] for x in lnex_lns]
@@ -217,6 +238,10 @@ if __name__ == "__main__":
         Recall = TPs_count/(TPs_count + FNs_count + .5 * .5 * overlaps_count)
         F_Score = (2 * Precision * Recall)/(Precision + Recall)
 
-        print "\t".join([bb, str(Precision), str(Recall), str(F_Score)])
+        percentage_disambiguated = one_geolocation/all_geolocation
+
+        sorted_dict = OrderedDict(sorted(geo_codes_length_dist.items(), key=operator.itemgetter(0), reverse=True))
+
+        print "\t".join([bb, str(Precision), str(Recall), str(F_Score), str(percentage_disambiguated)]),"\t", sorted_dict
 
         #print json.dumps(fns)
