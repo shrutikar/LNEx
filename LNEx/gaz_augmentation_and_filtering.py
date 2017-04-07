@@ -348,6 +348,8 @@ def aug_using_category_ellipses(geo_locations, geo_info):
 def augment(geo_locations, geo_info):
     '''Augments the location names using skip grams'''
 
+    with open(get_dicts_dir()+"locations_categories.txt") as f:
+        loc_cats = f.read().splitlines()
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -362,6 +364,8 @@ def augment(geo_locations, geo_info):
 
     new_geo_locations = defaultdict(set)
     new_geo_locations.update({x.lower():geo_locations[x] for x in geo_locations})'''
+
+    ############################################################################
 
     # step 2 (Augmentation) ++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -444,6 +448,11 @@ def augment(geo_locations, geo_info):
     for name in lns2:
 
         name_list = name.split()
+
+        # skip if the last token is not a location category
+        if name_list[-1] not in loc_cats:
+            continue
+
         name_len = len(name_list)
 
         flexi_grams = list()
