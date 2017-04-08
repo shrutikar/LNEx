@@ -9,6 +9,7 @@ import re, os
 from itertools import groupby
 from operator import itemgetter
 from collections import defaultdict
+from textblob import TextBlob
 
 ################################################################################
 ################################################################################
@@ -493,6 +494,13 @@ def augment(geo_locations, geo_info):
 
                 # not in the list of names before augmentation
                 if new_name not in lns:
+
+                    '''# check if only adjectives and the location category is Left
+                    blob = TextBlob(new_name)
+                    left = [x for x in blob.tags if x[1][0] != "J" and x[1] not in loc_cats]
+
+                    if len(left) > 0:'''
+
                     new_geo_locations[new_name] |= set(new_geo_locations[name])
 
     ############################################################################
