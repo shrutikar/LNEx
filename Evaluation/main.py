@@ -90,6 +90,7 @@ def init_using_files():
 def init_using_elasticindex(bb):
 
     lnex.elasticindex(conn_string='130.108.85.186:9200', index_name="photon_v1")
+    #lnex.elasticindex(conn_string='localhost:9201', index_name="photon")
 
     return lnex.initialize(bb, augment=True)
 
@@ -105,7 +106,7 @@ if __name__ == "__main__":
 
     for bb in bbs:
 
-        '''if bb != "chennai":
+        '''if bb not in ["chennai", "louisiana"]:
             continue'''
 
         init_using_elasticindex(bbs[bb])
@@ -127,6 +128,8 @@ if __name__ == "__main__":
         one_geolocation = .0
         all_geolocation = .0
         geo_codes_length_dist = defaultdict(int)
+
+        out_and_amb_extracted_lns = 0
 
         for key in anns:
 
@@ -174,8 +177,11 @@ if __name__ == "__main__":
             #   should've not extracted them
             tweet_lns_not_inLocs = set([x[0] for x in tweet_lns
                                             if x[1] != 'inLoc'])
+
             # add all extracted lns than are of types other than inLoc as FPs
-            FPs_count += len(lnex_lns & tweet_lns_not_inLocs)
+            amb_and_out_extracted = lnex_lns & tweet_lns_not_inLocs
+            out_and_amb_extracted_lns += len(amb_and_out_extracted)
+            FPs_count += len(amb_and_out_extracted)
 
             # remove LNs that are not inLoc, we already calculated their effect
             tweet_lns = set([x[0] for x in tweet_lns]) - tweet_lns_not_inLocs
@@ -242,6 +248,8 @@ if __name__ == "__main__":
 
         sorted_dict = OrderedDict(sorted(geo_codes_length_dist.items(), key=operator.itemgetter(0), reverse=True))
 
-        print "\t".join([bb, str(Precision), str(Recall), str(F_Score), str(percentage_disambiguated)]),"\t", sorted_dict
+        percentage_amb_out_extracted = out_and_amb_extracted_lns/all_geolocation
+
+        print "\t".join([bb, str(Precision), str(Recall), str(F_Score), str(percentage_disambiguated)]),"\t", percentage_amb_out_extracted
 
         #print json.dumps(fns)

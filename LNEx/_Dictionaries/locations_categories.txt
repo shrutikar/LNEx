@@ -12,6 +12,7 @@ annx
 anx
 apartment
 apartment block
+apartments
 aquarium
 arc
 arcade

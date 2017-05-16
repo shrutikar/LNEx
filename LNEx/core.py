@@ -970,7 +970,7 @@ def read_annotations(gaz_name):
 
 def run_multicomb_evaluations():
 
-    gaz_names = ["louisiana"]
+    gaz_names = ["chennai", "louisiana", "houston"]
     gaz_combs = get_gaz_combinations()#["wikipedia"]
 
     for gaz_name in gaz_names:
@@ -991,7 +991,15 @@ def run_multicomb_evaluations():
 
             fns = defaultdict(int)
 
+            count = 0
+
             for key in anns:
+        
+                count += 1
+
+                # skip the development set
+                if gaz_name != "houston" and count < 500:
+                    continue
 
                 tweet_lns = set()
                 lnex_lns = set()
@@ -1079,7 +1087,7 @@ def run_multicomb_evaluations():
                             .5 * .5 * overlaps_count)
             F_Score = (2 * Precision * Recall)/(Precision + Recall)
 
-            print "\t".join([gaz_comb, str(Precision),
+            print gaz_name, "\t".join([gaz_comb, str(Precision),
                                 str(Recall), str(F_Score)])
 
 if __name__ == "__main__":

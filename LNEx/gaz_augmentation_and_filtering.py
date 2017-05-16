@@ -171,7 +171,9 @@ def preprocess_name(loc_name):
             else:
                 final_list.append(name_to_break)
 
-    for __, item in enumerate(final_list):
+    # adds the full location name execluding the hyphen
+    # removing it increases the F-Score by 0.02%
+    '''for __, item in enumerate(final_list):
 
         # to remove all punctuations from the tweet later
         # and since it is not important if it is there or not
@@ -182,7 +184,7 @@ def preprocess_name(loc_name):
             item = item.replace("-", " ")
 
         item = re.sub('\s{2,}', ' ', item)
-        item = item.strip()
+        item = item.strip()'''
 
     final_list = list(set(final_list))
 
