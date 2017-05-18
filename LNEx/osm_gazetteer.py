@@ -198,8 +198,13 @@ def build_bb_gazetteer(bb, augment=True):
 
     if augment:
         # 'pullapuram road': set([493])
+
         new_geo_locations, extended_words3 = \
             gaz_augmentation_and_filtering.augment(geo_locations, geo_info)
+
+        print type(geo_locations)
+        print type(new_geo_locations)
+        exit()
 
     else:
         # Augmentation will mean filtering and augmentation again to be

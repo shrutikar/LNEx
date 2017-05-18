@@ -827,7 +827,7 @@ class init_Env(object):
 class init_Env_Files(object):
     '''Where all the gazetteer data, dictionaries and language model resides'''
 
-    def __init__(self, gaz_name, gaz_comb_name):
+    def __init__(self, gaz_name, gaz_comb_data):
         '''Initialized the system using the location names and list of english
         words (words3)'''
 
@@ -863,11 +863,15 @@ class init_Env_Files(object):
 
         ########################################################################
 
-        combined_unique_names_file = data_dir + gaz_name + "_language_model_"+ \
-                                    gaz_comb_name+"_unique_names_augmented.json"
+        #combined_unique_names_file = data_dir + gaz_name + "_language_model_"+ \
+        #                            gaz_comb_name+"_unique_names_augmented.json"
 
-        with open(combined_unique_names_file) as data_file:
-            self.gazetteer_unique_names = json.load(data_file)
+        #with open(combined_unique_names_file) as data_file:
+        #    self.gazetteer_unique_names = json.load(data_file)
+
+        #TODO: this should be substitutie by the augmented data
+ 
+        self.gazetteer_unique_names = gaz_comb_data
 
         if "" in self.gazetteer_unique_names:
             self.gazetteer_unique_names.pop("", None)
@@ -878,8 +882,10 @@ class init_Env_Files(object):
         self.gazetteer_unique_names = {x:[1]*self.gazetteer_unique_names[x]
                                         for x in self.gazetteer_unique_names}
 
-        self.gazetteer_unique_names_set = \
-                    set(self.gazetteer_unique_names.keys())
+        import gaz_augmentation_and_filtering
+        self.gazetteer_unique_names, _ = gaz_augmentation_and_filtering.augment(self.gazetteer_unique_names, [])
+
+        self.gazetteer_unique_names_set = set(self.gazetteer_unique_names)
 
         # NOTE BLACKLIST CODE GOES HERE
 
@@ -887,7 +893,7 @@ class init_Env_Files(object):
         # from the combined gazetteer, any word not in the list is
         # considered misspilled.
 
-        fname = data_dir+gaz_name+"_"+gaz_comb_name+"_words3_extended.txt"
+        fname = data_dir+gaz_name+"_osm_words3_extended.txt"
         with open(fname) as f:
 
             self.extended_words3 = f.read().splitlines()
@@ -968,19 +974,37 @@ def read_annotations(gaz_name):
 
     return data
 
+def read_raw_gazetteer_combinations():
+
+    dir = "/home/hussein/code/github/LNEx/_Data/raw_gazaetteers/Combinations/"
+    
+    raw_gazetteers = defaultdict(dict)
+
+    for file in os.listdir(dir):
+        
+        gaz = file[:file.index("_")]
+        
+        with open(dir+file) as f:
+            raw_gazetteers[gaz][file] = json.load(f)
+
+    return raw_gazetteers
+
+
 def run_multicomb_evaluations():
 
-    gaz_names = ["chennai", "louisiana", "houston"]
-    gaz_combs = get_gaz_combinations()#["wikipedia"]
+    raw_gazetteers = read_raw_gazetteer_combinations()
 
-    for gaz_name in gaz_names:
+    #gaz_names = ["chennai", "louisiana", "houston"]
+    #gaz_combs = get_gaz_combinations()#["wikipedia"]
+
+    for gaz_name in raw_gazetteers:
 
         anns = read_annotations(gaz_name)
 
-        for gaz_comb in gaz_combs:
+        for gaz_comb in raw_gazetteers[gaz_name]:
 
             # init environment using gaz combination ###########################
-            g_env = init_Env_Files(gaz_name, gaz_comb)
+            g_env = init_Env_Files(gaz_name, raw_gazetteers[gaz_name][gaz_comb])
             set_global_env(g_env)
             ####################################################################
 
@@ -1087,7 +1111,7 @@ def run_multicomb_evaluations():
                             .5 * .5 * overlaps_count)
             F_Score = (2 * Precision * Recall)/(Precision + Recall)
 
-            print gaz_name, "\t".join([gaz_comb, str(Precision),
+            print "\t".join([gaz_comb, str(Precision),
                                 str(Recall), str(F_Score)])
 
 if __name__ == "__main__":
