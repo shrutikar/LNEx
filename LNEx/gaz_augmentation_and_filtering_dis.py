@@ -272,36 +272,27 @@ def filter_geo_locations(geo_locations):
     ############################################################################
 
     # ln >
-    new_geo_locations = defaultdict(set)
+    new_geo_locations = defaultdict()
 
     # step 1 (Filtering) +++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     for text in geo_locations:
 
-        original_text = text
-
-        print geo_locations[original_text]
-
         # add the original name
-        new_geo_locations[original_text] = set(str(geo_locations[original_text])+"o")
+        new_geo_locations[text.lower()] = geo_locations[text]
 
-        print new_geo_locations[original_text]
-        exit()
-
-        text = text.replace("( ", "(").replace(" )", ")")
-
-        text = text.lower()
+        text_edited = text.replace("( ", "(").replace(" )", ")").lower()
 
         # remove bracketed blacklisted bracketed mentions
         for name_to_remove in names_to_remove:
-            if name_to_remove in text:
-                text = text.replace(name_to_remove, "")
+            if name_to_remove in text_edited:
+                text_edited = text_edited.replace(name_to_remove, "")
 
         # punctuation padding
-        text = re.sub('([,;])', r'\1 ', text)
-        text = re.sub('\s{2,}', ' ', text)
+        text_edited = re.sub('([,;])', r'\1 ', text_edited)
+        text_edited = re.sub('\s{2,}', ' ', text_edited)
 
-        names = preprocess_name(text)
+        names = preprocess_name(text_edited)
 
         ###################################
 
@@ -318,11 +309,7 @@ def filter_geo_locations(geo_locations):
 
             # prevents collisions
             if name not in new_geo_locations:
-                print ">>", new_geo_locations[name]
-                new_geo_locations[name] |= set(geo_locations[original_text])
-                print "<<", new_geo_locations[name]
-
-    exit()
+                new_geo_locations[name.lower()] = geo_locations[text]
 
     return new_geo_locations
 
@@ -402,8 +389,7 @@ def augment(geo_locations):
 
                 # not in the list of names before augmentation
                 if alphanumeric_name not in lns:
-                    new_geo_locations[alphanumeric_name] |= set(
-                        new_geo_locations[name])
+                    new_geo_locations[alphanumeric_name] = new_geo_locations[name]
 
     # step 3 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -412,6 +398,10 @@ def augment(geo_locations):
     lns2 = set(new_geo_locations)
 
     for name in lns2:
+
+        # do not create skip grams for the name with brackets
+        if "(" in name or ")" in name:
+            continue
 
         name_list = name.split()
         name_len = len(name_list)
@@ -453,7 +443,10 @@ def augment(geo_locations):
                     continue
 
                 # not in the list of names before augmentation
-                if new_name not in lns:
-                    new_geo_locations[new_name] |= set(new_geo_locations[name])
+                if new_name not in lns2:
+                    new_geo_locations[new_name] = new_geo_locations[name]
 
     return new_geo_locations, get_extended_words3(new_geo_locations.keys())
+
+if __name__ == "__main__":
+    print augment({unicode("Anna Salai (Mount Road)"): 1})[0]

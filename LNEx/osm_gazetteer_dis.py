@@ -157,44 +157,45 @@ def build_bb_gazetteer(bb, augment=True):
                        "name", "state", "street"]
     meta_fields = ["osm_key", "osm_value", "postcode"]
 
-    new_geolocations = list()
+    # list of all geolocation names inside the bb
+    geolocations = list()
 
     # ln > id
-    all_geolocations = defaultdict()
+    geolocations_names_dict = defaultdict()
     # id > ln
-    all_geolocations_invert = defaultdict()
+    geolocations_names_inverted_dict = defaultdict()
 
     for match in search_index(bb):
 
-        new_geolocation = { "name": None,
-                            "coordinate": None,
-                            "extent": None,
-                            "country": None,
-                            "state": None,
-                            "city": None,
-                            "street": None,
-                            "osm_key": None,
-                            "osm_value": None,
-                            "postcode": None}
+        geolocation = { "name": None,
+                        "coordinate": None,
+                        "extent": None,
+                        "country": None,
+                        "state": None,
+                        "city": None,
+                        "street": None,
+                        "osm_key": None,
+                        "osm_value": None,
+                        "postcode": None}
 
         keys = dir(match)
 
         if "coordinate" in keys:
             # [lat, lon]
-            new_geolocation["coordinate"] = [ match["coordinate"]["lat"],
+            geolocation["coordinate"] = [ match["coordinate"]["lat"],
                                               match["coordinate"]["lon"]]
 
         if "extent" in keys:
             # [ upper_left_lat, upper_left_lon,
             #   bottom_right_lat, bottom_right_lon ]
-            new_geolocation["extent"] = [ match["extent"]["coordinates"][0][1],
-                                            match["extent"]["coordinates"][0][0],
-                                            match["extent"]["coordinates"][1][1],
-                                            match["extent"]["coordinates"][1][0]]
+            geolocation["extent"] = [   match["extent"]["coordinates"][0][1],
+                                        match["extent"]["coordinates"][0][0],
+                                        match["extent"]["coordinates"][1][1],
+                                        match["extent"]["coordinates"][1][0]]
 
         for meta_field in meta_fields:
             if meta_field in keys:
-                new_geolocation[meta_field] = match[meta_field]
+                geolocation[meta_field] = match[meta_field]
 
         #######################################################################
 
@@ -204,33 +205,52 @@ def build_bb_gazetteer(bb, augment=True):
 
                 try:
                     txt = extract_text(match[key])
-                    new_geolocation[key] = txt
+                    geolocation[key] = txt
 
-                    if txt not in all_geolocations and txt is not None:
-                        all_geolocations[txt] = len(all_geolocations.keys())
-                        all_geolocations_invert[len(all_geolocations.keys())] = txt
+                    if txt not in geolocations_names_dict and txt is not None:
+                        geolocations_names_dict[txt] = len(geolocations_names_dict.keys())
 
                 except BaseException:
                     raise
 
         # add new geolocation
-        new_geolocations.append(new_geolocation)
+        geolocations.append(geolocation)
 
     ############################################################################
 
     if augment:
         # 'pullapuram road': set([493])
-        new_geo_locations, extended_words3 = \
-            gaz_augmentation_and_filtering_dis.augment(all_geolocations)
+        geolocations_names_dict_augmented, extended_words3 = \
+            gaz_augmentation_and_filtering_dis.augment(geolocations_names_dict)
 
     else:
-        new_geo_locations = \
-            gaz_augmentation_and_filtering_dis.filter_geo_locations(all_geolocations)
+        geolocations_names_dict_augmented = \
+            gaz_augmentation_and_filtering_dis.filter_geo_locations(geolocations_names_dict)
         extended_words3 = \
             gaz_augmentation_and_filtering_dis.get_extended_words3(
-                new_geo_locations.keys())
+                geolocations_names_dict_augmented.keys())
 
-    return new_geo_locations, geo_info, extended_words3
+    ############################################################################
+
+    # Now, get the augmented names and add them to the geolocations records
+
+    # map id to names
+    inverted_dict = defaultdict(set)
+    for key, value in geolocations_names_dict_augmented.iteritems():
+        inverted_dict[value].add(key)
+
+    # created mapping from Orginal LN to the LN augmentations
+    ln_to_augmentations = defaultdict(set)
+    for key, value in inverted_dict.iteritems():
+        for ln in value:
+            ln_to_augmentations[ln] = value
+
+        if "anna salai (mount road)" in value:
+            print list(value)
+            print ">>>>>>>"
+            exit()
+
+    return geolocations_names_dict_augmented, geo_info, extended_words3
 
 ################################################################################
 
