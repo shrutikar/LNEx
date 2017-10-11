@@ -1,3 +1,4 @@
+
 """#############################################################################
 Copyright 2017 Hussein S. Al-Olimat, hussein@knoesis.org
 
@@ -12,8 +13,7 @@ from elasticsearch_dsl import Search, Q
 from elasticsearch_dsl.connections import connections
 
 import geo_calculations
-import gaz_augmentation_and_filtering
-import gaz_augmentation_and_filtering_new
+import gaz_augmentation_and_filtering_dis
 
 import json
 
@@ -155,85 +155,79 @@ def build_bb_gazetteer(bb, augment=True):
     # accepted fields as location names
     location_fields = ["city", "country",
                        "name", "state", "street"]
+    meta_fields = ["osm_key", "osm_value", "postcode"]
 
-    geo_info = defaultdict()
-    geo_locations = defaultdict(list)
+    new_geolocations = list()
 
-    _id = 0
+    # ln > id
+    all_geolocations = defaultdict()
+    # id > ln
+    all_geolocations_invert = defaultdict()
 
-    new_geo_locations = {   "name": None,
+    for match in search_index(bb):
+
+        new_geolocation = { "name": None,
                             "coordinate": None,
                             "extent": None,
                             "country": None,
                             "state": None,
                             "city": None,
-                            "street": None
-                        }
-
-    for match in search_index(bb):
-
-        _id += 1
+                            "street": None,
+                            "osm_key": None,
+                            "osm_value": None,
+                            "postcode": None}
 
         keys = dir(match)
 
-        geo_item = defaultdict()
-
         if "coordinate" in keys:
-            geo_item["point"] = match["coordinate"]
-
             # [lat, lon]
-            new_geo_locations["coordinate"] = [ match["coordinate"]["lat"],
-                                                match["coordinate"]["lon"]]
+            new_geolocation["coordinate"] = [ match["coordinate"]["lat"],
+                                              match["coordinate"]["lon"]]
 
         if "extent" in keys:
-            geo_item["extent"] = match["extent"]["coordinates"]
-
             # [ upper_left_lat, upper_left_lon,
             #   bottom_right_lat, bottom_right_lon ]
-            new_geo_locations["extent"] = [ match["extent"]["coordinates"][0][1],
+            new_geolocation["extent"] = [ match["extent"]["coordinates"][0][1],
                                             match["extent"]["coordinates"][0][0],
                                             match["extent"]["coordinates"][1][1],
                                             match["extent"]["coordinates"][1][0]]
 
+        for meta_field in meta_fields:
+            if meta_field in keys:
+                new_geolocation[meta_field] = match[meta_field]
+
         #######################################################################
 
-        for key in dir(match):
+        for key in keys:
 
             if key in location_fields:
 
                 try:
-                    text = extract_text(match[key])
+                    txt = extract_text(match[key])
+                    new_geolocation[key] = txt
 
-                    if key == "name":
-                        # mapping a location name to its geo-info
-                        geo_locations[text].append(_id)
-
-                        geo_info[_id] = {   "name": text,
-                                            "geo_item": geo_item}
-
-                        new_geo_locations["name"] = gaz_augmentation_and_filtering_new.augment(text)[0]
-
-                    else:
-                        geo_locations[text] = list()
-
-                        new_geo_locations[key] = gaz_augmentation_and_filtering_new.augment(text)[0]
+                    if txt not in all_geolocations and txt is not None:
+                        all_geolocations[txt] = len(all_geolocations.keys())
+                        all_geolocations_invert[len(all_geolocations.keys())] = txt
 
                 except BaseException:
                     raise
 
-    print json.dumps(new_geo_locations)
-    exit()
+        # add new geolocation
+        new_geolocations.append(new_geolocation)
+
+    ############################################################################
 
     if augment:
         # 'pullapuram road': set([493])
         new_geo_locations, extended_words3 = \
-            gaz_augmentation_and_filtering.augment(geo_locations)
+            gaz_augmentation_and_filtering_dis.augment(all_geolocations)
 
     else:
         new_geo_locations = \
-            gaz_augmentation_and_filtering.filter_geo_locations(geo_locations)
+            gaz_augmentation_and_filtering_dis.filter_geo_locations(all_geolocations)
         extended_words3 = \
-            gaz_augmentation_and_filtering.get_extended_words3(
+            gaz_augmentation_and_filtering_dis.get_extended_words3(
                 new_geo_locations.keys())
 
     return new_geo_locations, geo_info, extended_words3
@@ -245,7 +239,7 @@ if __name__ == "__main__":
     #bb = [41.6187434973, -83.7106928844, 41.6245055116, -83.7017216664]
     bb = [41.6210542639,-83.7086427212,41.623699501,-83.7079453468]
     # Chennai
-    #bb = [12.74, 80.066986084, 13.2823848224, 80.3464508057]
+    bb = [12.74, 80.066986084, 13.2823848224, 80.3464508057]
 
     # connection_string = '130.108.85.186:9200'
     # index_name = "photon_v1"
