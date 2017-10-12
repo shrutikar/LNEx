@@ -236,16 +236,21 @@ def build_bb_gazetteer(bb, augment=True):
 
     # map id to names
     inverted_dict = defaultdict(set)
+    ln_to_ids = defaultdict(set)
     for ln, nid in geolocations_names_dict_augmented:
         inverted_dict[nid].add(ln)
 
+        ln_to_ids[ln].add(nid)
+
     # created mapping from Orginal LN to the LN augmentations
     ln_to_augmentations = defaultdict(set)
+
     for key, value in inverted_dict.iteritems():
         for ln in value:
             ln_to_augmentations[ln] |= value
 
-    return geolocations_names_dict_augmented, extended_words3
+    # geolocations_names_dict_augmented is a set
+    return ln_to_ids, extended_words3
 
 ################################################################################
 
