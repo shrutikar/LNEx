@@ -165,6 +165,8 @@ def build_bb_gazetteer(bb, augment=True):
     # id > ln
     geolocations_names_inverted_dict = defaultdict()
 
+    #hierarchy = defaultdict(set)
+
     for match in search_index(bb):
 
         geolocation = { "name": None,
@@ -179,6 +181,13 @@ def build_bb_gazetteer(bb, augment=True):
                         "postcode": None}
 
         keys = dir(match)
+
+        """k = set()
+        for key in keys:
+            if key in location_fields:
+                k.add(key)
+
+        hierarchy[match["osm_value"]] = list(k)"""
 
         if "coordinate" in keys:
             # [lat, lon]
@@ -216,6 +225,10 @@ def build_bb_gazetteer(bb, augment=True):
         # add new geolocation
         geolocations.append(geolocation)
 
+    """with open("../_Output/hierarchy.json", "w") as f:
+        json.dump(hierarchy, f)
+    exit()"""
+
     ############################################################################
 
     if augment:
@@ -249,15 +262,54 @@ def build_bb_gazetteer(bb, augment=True):
         for ln in value:
             ln_to_augmentations[ln] |= value
 
+    """osm_values = set()
+    for geolocation in geolocations:
+        osm_values.add(geolocation["osm_value"])
+        continue
+        for field in location_fields:
+            if geolocation[field] is not None:
+                geolocation[field] = list(ln_to_augmentations[geolocation[field].lower()])
+
+    print osm_values
+    #print geolocations
+
+    with open("../_Output/chennai_geolocations_raw.json", "w") as f:
+        json.dump(geolocations, f)"""
+
+    index_geolocations(geolocations)
+
     # geolocations_names_dict_augmented is a set
     return ln_to_ids, extended_words3
 
 ################################################################################
 
+def index_geolocations(geolocations):
+
+    es = Elasticsearch(['localhost'], port=9201)
+
+    try:
+        es.indices.delete(index='geolocations-index')
+    except:
+        print "cannot delete index!"
+
+    try:
+        es.indices.create(index='geolocations-index')
+    except:
+        print "cannot create index!", "Exiting!"
+        exit()
+
+    # -------------
+    for geolocation in geolocations:
+        es.index(index='geolocations-index', doc_type='geolocation', body=json.dumps(geolocation))
+    
+
+
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 if __name__ == "__main__":
 
     #bb = [41.6187434973, -83.7106928844, 41.6245055116, -83.7017216664]
-    bb = [41.6210542639,-83.7086427212,41.623699501,-83.7079453468]
+    #bb = [41.6210542639,-83.7086427212,41.623699501,-83.7079453468]
     # Chennai
     bb = [12.74, 80.066986084, 13.2823848224, 80.3464508057]
 

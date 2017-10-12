@@ -1,6 +1,8 @@
 # Data
 _Data/Brat_Annotations
 
+_Output/
+
 .idea/
 
 # Byte-compiled / optimized / DLL files
