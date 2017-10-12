@@ -272,14 +272,14 @@ def filter_geo_locations(geo_locations):
     ############################################################################
 
     # ln >
-    new_geo_locations = defaultdict()
+    new_geo_locations = set()
 
     # step 1 (Filtering) +++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     for text in geo_locations:
 
         # add the original name
-        new_geo_locations[text.lower()] = geo_locations[text]
+        new_geo_locations.add((text.lower(), geo_locations[text]))
 
         text_edited = text.replace("( ", "(").replace(" )", ")").lower()
 
@@ -299,7 +299,7 @@ def filter_geo_locations(geo_locations):
         for name in names:
 
             name = unicodedata.normalize(
-                'NFKD', name).encode(
+                'NFKD', unicode(name)).encode(
                 'ascii', 'ignore')
             name = str(name.strip())
 
@@ -308,8 +308,8 @@ def filter_geo_locations(geo_locations):
                 continue
 
             # prevents collisions
-            if name not in new_geo_locations:
-                new_geo_locations[name.lower()] = geo_locations[text]
+            if (name,geo_locations[text])  not in new_geo_locations:
+                new_geo_locations.add((name.lower(), geo_locations[text]))
 
     return new_geo_locations
 
@@ -372,9 +372,13 @@ def augment(geo_locations):
         "3rd",
         ""]
 
+    # lns: set of tuples (ln, nid)
     lns = set(new_geo_locations)
 
     for name in lns:
+
+        nid = name[1]
+        name = name[0]
 
         nospaces = name.replace(" ", "")
 
@@ -388,8 +392,8 @@ def augment(geo_locations):
             if alphanumeric_name != name and alphanumeric_name not in gaz_stopwords:
 
                 # not in the list of names before augmentation
-                if alphanumeric_name not in lns:
-                    new_geo_locations[alphanumeric_name] = new_geo_locations[name]
+                if (alphanumeric_name, nid) not in lns:
+                    new_geo_locations.add((alphanumeric_name, nid))
 
     # step 3 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -398,6 +402,9 @@ def augment(geo_locations):
     lns2 = set(new_geo_locations)
 
     for name in lns2:
+
+        nid = name[1]
+        name = name[0]
 
         # do not create skip grams for the name with brackets
         if "(" in name or ")" in name:
@@ -443,10 +450,14 @@ def augment(geo_locations):
                     continue
 
                 # not in the list of names before augmentation
-                if new_name not in lns2:
-                    new_geo_locations[new_name] = new_geo_locations[name]
+                if (new_name, nid) not in lns2:
+                    new_geo_locations.add((new_name, nid))
 
-    return new_geo_locations, get_extended_words3(new_geo_locations.keys())
+    return new_geo_locations, get_extended_words3([x[0] for x in new_geo_locations])
 
 if __name__ == "__main__":
-    print augment({unicode("Anna Salai (Mount Road)"): 1})[0]
+
+    test_data = { "Anna Salai (Mount Road)": 1,
+                  "Anna Salai": 2}
+
+    print augment(test_data)[0]

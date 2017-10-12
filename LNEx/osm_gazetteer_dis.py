@@ -236,21 +236,16 @@ def build_bb_gazetteer(bb, augment=True):
 
     # map id to names
     inverted_dict = defaultdict(set)
-    for key, value in geolocations_names_dict_augmented.iteritems():
-        inverted_dict[value].add(key)
+    for ln, nid in geolocations_names_dict_augmented:
+        inverted_dict[nid].add(ln)
 
     # created mapping from Orginal LN to the LN augmentations
     ln_to_augmentations = defaultdict(set)
     for key, value in inverted_dict.iteritems():
         for ln in value:
-            ln_to_augmentations[ln] = value
+            ln_to_augmentations[ln] |= value
 
-        if "anna salai (mount road)" in value:
-            print list(value)
-            print ">>>>>>>"
-            exit()
-
-    return geolocations_names_dict_augmented, geo_info, extended_words3
+    return geolocations_names_dict_augmented, extended_words3
 
 ################################################################################
 
@@ -269,6 +264,4 @@ if __name__ == "__main__":
 
     set_elasticindex_conn(connection_string, index_name)
 
-    geo_locations, geo_info, extended_words3 = build_bb_gazetteer(bb)
-
-    print geo_info
+    geo_locations, extended_words3 = build_bb_gazetteer(bb)
