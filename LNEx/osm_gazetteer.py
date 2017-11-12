@@ -62,7 +62,7 @@ def search_index(bb):
         exit()
 
     connections.create_connection(hosts=[connection_string], timeout=60)
-    
+
     phrase_search = [Q({"filtered": {
         "filter": {
             "geo_bounding_box": {
@@ -205,6 +205,22 @@ def build_bb_gazetteer(bb, augment=True):
         extended_words3 = \
             gaz_augmentation_and_filtering.get_extended_words3(
                 new_geo_locations.keys())
+
+    # import json
+    # import pickle
+    # with open("_Data/chennai_geo_locations.json", "w") as f:
+    #     _new_geo_locations = {x:list(new_geo_locations[x]) for x in new_geo_locations}
+    #
+    #     json.dump(_new_geo_locations, f)
+    #
+    # with open("_Data/chennai_geo_info.pkl", "w") as f:
+    #     pickle.dump(geo_info, f, protocol=pickle.HIGHEST_PROTOCOL)
+    #
+    # with open("_Data/extended_words3.json", "w") as f:
+    #     json.dump(extended_words3, f)
+    #
+    # print "done!"
+    # exit()
 
     return new_geo_locations, geo_info, extended_words3
 
