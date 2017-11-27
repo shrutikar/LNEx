@@ -1,6 +1,8 @@
 # Data
 _Data/Brat_Annotations
 _Data/raw_gazaetteers
+_Data/tweets
+_Data/Spatiotemporal
 
 .idea/
 
