@@ -10,6 +10,8 @@ import unicodedata
 import numpy as np
 import datetime
 
+import pandas as pd
+
 import LNEx as lnex
 
 from LNEx import geo_calculations
@@ -70,8 +72,7 @@ def absoluteFilePaths(directory):
                yield os.path.abspath(os.path.join(dirpath, f))
 
 
-if __name__ == "__main__":
-
+def spatiotemporal_mapping():
     #for fname in absoluteFilePaths("_Data/tweets/"):
     #    print fname
 
@@ -116,6 +117,9 @@ if __name__ == "__main__":
 
                 for x in lnex.extract(text):
 
+                    if x[2].lower() in ["chennai", "lousiana", "houston"]:
+                        continue
+
                     for geo_point in x[3]:
                         geo_point = geo_info[geo_point]['geo_item']['point']
 
@@ -158,3 +162,75 @@ if __name__ == "__main__":
             json.dump(tweet_tweet_spatiotemporal_mapping, f)
 
         print "Done!"
+
+def json_to_csv():
+    for fname in absoluteFilePaths("_Data/Spatiotemporal/"):
+
+        if not fname.endswith(".json"):
+            continue
+
+        with open(fname) as f:
+            data = json.load(f)
+
+        l = []
+
+        all_time_largest = 0
+        all_time_longest_tweets = 0
+
+        for tweet, hours in data.iteritems():
+
+            longest_list = 0
+            largest_hour = 0
+
+            for hour, tweets in hours.iteritems():
+
+                if hour > largest_hour:
+                    largest_hour = int(hour)
+
+                if len(tweets) > longest_list:
+                    longest_list = len(tweets)
+
+                    if longest_list > all_time_longest_tweets:
+                        all_time_longest_tweets = longest_list
+
+            if all_time_largest < largest_hour:
+                all_time_largest = largest_hour
+
+            columns = []
+
+            columns.append([tweet])
+            columns[-1].extend([""]*longest_list)
+
+            #print columns[-1]
+
+            for i in range(0, largest_hour+1):
+
+                tweets = hours.get(unicode(i))
+
+                column = []
+                if tweets is not None:
+                    column = tweets
+
+                columns.append(column)
+                columns[-1].extend([""]*(longest_list-len(column)))
+
+            for i in range(len(columns[0])-1):
+                row = []
+                for column in columns:
+                    row.append(column[i])
+                l.append(row)
+
+            l.append(["#######"]*len(l[0]))
+
+        headers = ["Tweet"]
+        headers.extend(range(all_time_largest+1))
+
+        df = pd.DataFrame(l, columns=headers)
+
+        df.to_csv(fname+".csv", sep='\t', encoding='utf-8')
+
+
+if __name__ == "__main__":
+
+    spatiotemporal_mapping()
+    json_to_csv()
