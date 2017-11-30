@@ -5,7 +5,7 @@ This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
 #############################################################################"""
 
-import json, os
+import json, os, re
 import unicodedata
 import numpy as np
 import datetime
@@ -236,11 +236,10 @@ def json_to_files():
 
         folder_name = fname[fname.rindex("/")+1:fname.index(".json")]
 
+        print folder_name
+
         with open(fname) as f:
             data = json.load(f)
-
-        print len(data.keys())
-        continue
 
         topics = [  "road",
                     "airport",
