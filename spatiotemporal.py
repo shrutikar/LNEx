@@ -229,8 +229,106 @@ def json_to_csv():
 
         df.to_csv(fname+".csv", sep='\t', encoding='utf-8')
 
+def json_to_files():
+    for fname in absoluteFilePaths("_Data/Spatiotemporal/"):
+        if not fname.endswith(".json"):
+            continue
+
+        folder_name = fname[fname.rindex("/")+1:fname.index(".json")]
+
+        with open(fname) as f:
+            data = json.load(f)
+
+        print len(data.keys())
+        continue
+
+        topics = [  "road",
+                    "airport",
+                    "bridge",
+                    "closed",
+                    "school",
+                    "injured",
+                    "stranded",
+                    "evacuated",
+                    "evacuate",
+                    "dead",
+                    "damage",
+                    "damaged",
+                    "delayed",
+                    "canceled",
+                    "buried",
+                    "gaz",
+                    "outage",
+                    "water",
+                    "fuel",
+                    "power",
+                    "warning",
+                    "cleaning",
+                    "restore" ]
+
+        counter = 0
+        for tweet, hours in data.iteritems():
+
+            # remove url from tweet
+            tweet = re.sub(
+                    r'\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*',
+                    '',
+                    tweet)
+
+            if  not any(t in tweet.lower() for t in topics) or \
+                len(hours.keys()) < 1:
+                continue
+
+            rows = []
+
+            rows.append(tweet)
+            rows.append("")
+
+            keys = hours.keys()
+            keys = [int(key) for key in keys]
+            keys.sort()
+
+            for key in keys:
+
+                rows.append(key)
+
+                tweets = hours.get(unicode(key))
+
+                if tweets is not None:
+
+                    bucket_rows = set()
+
+                    for t in tweets:
+
+                        # remove URL
+                        t = re.sub(
+                                r'\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*',
+                                '',
+                                t)
+
+                        # this will remove all tweets which only differs by the URL
+                        bucket_rows.add(t)
+
+                    rows.extend(list(bucket_rows))
+
+                rows.append("")
+
+            #df = pd.DataFrame(rows, columns=[""])
+
+            file_path = "_Data/spatiotemporal_streams/"+folder_name+"/tweet_stream_"+str(counter)+".txt"
+
+            with open (file_path,"w")as fp:
+                for line in rows:
+
+                    line = str(line).replace("\n", " ")
+
+                    fp.write(line+"\n")
+
+            counter+=1
 
 if __name__ == "__main__":
 
-    spatiotemporal_mapping()
-    json_to_csv()
+    #spatiotemporal_mapping()
+    #json_to_csv()
+
+    json_to_files()
