@@ -29,10 +29,14 @@ Following are the steps which allows you to setup and start using LNEx.
 ### Important Files and Directory layout
     .
     ├── _Data                           # where all the cached data resides for testing purposes
-    │   ├── Brat_Annotations_Samples    # Contains 50 samples of annotated tweets for the three datasets. Tweets will be read from here to test LNEx.
-    │   └── Cached_Gazetteers           # Contains 3 cached files for each dataset (to replace using elastic index of OSM, if you still want to use elastic index please refer to "Querying OpenStreetMap Gazetteers" section below)
+    │   ├── Brat_Annotations_Samples    # Contains 50 samples of annotated tweets for the three 
+    |   |                                datasets. Tweets will be read from here to test LNEx.
+    │   └── Cached_Gazetteers           # Contains 3 cached files for each dataset (to replace 
+    |       |                               using elastic index of OSM, if you still want to use 
+    |       |                               elastic index please refer to "Querying OpenStreetMap 
+    |       |                               Gazetteers" section below)
     |       ├── *_extended_words3.json      # contains the custom stopwords list for each dataset
-    |       ├── *_geo_info.json             # contains the geo information (i.e., metadata) from OpenStreetMap
+    |       ├── *_geo_info.json             # contains the geo information (i.e., metadata) from OSM
     │       └── *_geo_locations.json        # contains all augmented and filtered gazetteer locations
     ├── LNEx                # contains the core code-base of LNEx
     │   ├── _Dictionaries   # contains the dictionaries used by LNEx. For more info read the README file
