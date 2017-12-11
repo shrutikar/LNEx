@@ -1,8 +1,11 @@
 '''#############################################################################
-Copyright 2017 Hussein S. Al-Olimat, hussein@knoesis.org
+Copyright 2017 anonymous authors of N-A-A-C-L submission titled:
+    "Location Name Extraction from Targeted Text Streams using Gazetteer-based
+        Statistical Language Models"
 
-This software is released under the GNU Affero General Public License (AGPL)
-v3.0 License.
+LNEx code is available online for N-A-A-C-L-2018 review purposes only. Users
+    are not allowed to clone, share, or use in any way without permission
+    from the authors after the double-blind period.
 #############################################################################'''
 
 import re
@@ -11,6 +14,7 @@ import json
 import string
 import itertools
 import collections
+import unicodedata
 from itertools import groupby
 from wordsegment import load, segment
 from operator import itemgetter
@@ -96,6 +100,13 @@ class Tree(object):
         return str(self.cargo)
 
 ################################################################################
+
+def strip_non_ascii(s):
+    if isinstance(s, unicode):
+        nfkd = unicodedata.normalize('NFKD', s)
+        return str(nfkd.encode('ASCII', 'ignore').decode('ASCII'))
+    else:
+        return s
 
 def preprocess_tweet(tweet):
     '''Preprocesses the tweet text and break the hashtags'''
@@ -355,6 +366,8 @@ def extract(tweet):
 
     #will contain for example: (0, 11): [(u'new avadi road', 3)]
     valid_ngrams = defaultdict(list)
+
+    tweet = strip_non_ascii(tweet)
 
     # we will call a tweet from now onwards a query
     query = str(tweet.lower())

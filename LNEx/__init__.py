@@ -5,6 +5,7 @@ This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
 #############################################################################"""
 
+import os, json
 import core
 import osm_gazetteer
 
@@ -25,7 +26,7 @@ def initialize_using_files(geo_locations, extended_words3):
 
 ################################################################################
 
-def initialize(bb, augment=True):
+def initialize(bb, augment, cache, dataset_name):
     """Initialize LNEx using the elastic index"""
 
     # retrieve the records from OSM based on the passed bb
@@ -34,6 +35,18 @@ def initialize(bb, augment=True):
 
     # initialize LNEx using the retrieved (possible augmented) location names
     core.initialize(geo_locations, extended_words3)
+
+    if cache:
+
+        folder_abs_path = os.path.abspath(os.path.join(os.path.dirname( __file__),
+                            '..', "_Data", "Cached_Gazetteers"))
+
+        with open(folder_abs_path+"/"+dataset_name+"_geo_locations.json", "w") as f:
+            json.dump(geo_locations, f)
+        with open(folder_abs_path+"/"+dataset_name+"_geo_info.json", "w") as f:
+            json.dump(geo_info, f)
+        with open(folder_abs_path+"/"+dataset_name+"_extended_words3.json", "w") as f:
+            json.dump(extended_words3, f)
 
     return geo_info
 
