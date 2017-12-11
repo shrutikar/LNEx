@@ -1,11 +1,10 @@
 '''#############################################################################
-Copyright 2017 anonymous authors of N-A-A-C-L submission titled:
+Copyright 2017 - anonymous authors of NAACL submission titled:
     "Location Name Extraction from Targeted Text Streams using Gazetteer-based
         Statistical Language Models"
 
-LNEx code is available online for N-A-A-C-L-2018 review purposes only. Users
-    are not allowed to clone, share, or use in any way without permission
-    from the authors after the double-blind period.
+LNEx code is available now for review purposes only. The tool will be made open
+    after the review process.
 #############################################################################'''
 
 import re

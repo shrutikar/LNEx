@@ -1,9 +1,11 @@
-"""#############################################################################
-Copyright 2017 Hussein S. Al-Olimat, hussein@knoesis.org
+'''#############################################################################
+Copyright 2017 - anonymous authors of NAACL submission titled:
+    "Location Name Extraction from Targeted Text Streams using Gazetteer-based
+        Statistical Language Models"
 
-This software is released under the GNU Affero General Public License (AGPL)
-v3.0 License.
-#############################################################################"""
+LNEx code is available now for review purposes only. The tool will be made open
+    after the review process.
+#############################################################################'''
 
 from collections import defaultdict
 
@@ -94,7 +96,7 @@ def search_index(bb):
 
     return res
 
-    # Do not work correctly
+    # Does not work correctly
     # s = Search(using=client, index=index_name) \
     #     .filter("geo_bounding_box", location={
     #         "top_right": {
@@ -225,9 +227,6 @@ def build_bb_gazetteer(bb, augment=True):
 if __name__ == "__main__":
 
     bb = [41.6187434973, -83.7106928844, 41.6245055116, -83.7017216664]
-
-    # connection_string = '130.108.85.186:9200'
-    # index_name = "photon_v1"
 
     connection_string = "localhost:9200"
     index_name = "photon"

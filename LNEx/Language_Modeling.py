@@ -1,9 +1,11 @@
-"""#############################################################################
-Copyright 2017 Hussein S. Al-Olimat, hussein@knoesis.org
+'''#############################################################################
+Copyright 2017 - anonymous authors of NAACL submission titled:
+    "Location Name Extraction from Targeted Text Streams using Gazetteer-based
+        Statistical Language Models"
 
-This software is released under the GNU Affero General Public License (AGPL)
-v3.0 License.
-#############################################################################"""
+LNEx code is available now for review purposes only. The tool will be made open
+    after the review process.
+#############################################################################'''
 
 # This model was inspired by the following sources:
 # > http://www.katrinerk.com/courses/python-worksheets/language-models-in-python

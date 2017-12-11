@@ -1,11 +1,10 @@
 '''#############################################################################
-Copyright 2017 anonymous authors of N-A-A-C-L submission titled:
+Copyright 2017 - anonymous authors of NAACL submission titled:
     "Location Name Extraction from Targeted Text Streams using Gazetteer-based
         Statistical Language Models"
 
-LNEx code is available online for N-A-A-C-L-2018 review purposes only. Users
-    are not allowed to clone, share, or use in any way without permission
-    from the authors after the double-blind period.
+LNEx code is available now for review purposes only. The tool will be made open
+    after the review process.
 #############################################################################'''
 
 import json
@@ -64,88 +63,14 @@ def init_using_elasticindex(bb, cache, dataset):
 
 ################################################################################
 
-def slice_data(dataset):
-
-    from collections import defaultdict
-    from random import shuffle
-
-    with open("_Data/Brat_Annotations/"+dataset.title()+"_annotations.json") as f:
-        data = json.load(f)
-
-    lns = set()
-    tweets = set()
-    for x in data:
-        ll = set()
-        for y in data[x].keys():
-            if y != "text":
-
-                ln = data[x][y]["text"].lower()
-
-                ll.add(ln)
-
-        # if dataset in ll:
-        #     continue
-
-        if ll-lns != set():
-            lns |= ll
-            tweets.add(x)
-
-    keys = list(tweets)
-
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-    shuffle(keys)
-
-    data2 = defaultdict()
-    for key in keys[:50]:
-        data2[key] = data[key]
-
-    with open("_Data/Brat_Annotations_Samples/"+dataset+"_50.json", 'w') as f:
-        json.dump(data2, f)
-
 if __name__ == "__main__":
 
     bbs = {
         "chennai": [12.74, 80.066986084, 13.2823848224, 80.3464508057],
-        "houston": [29.4778611958,-95.975189209,30.1463147381,-94.8889160156],
-        "louisiana":[29.4563,-93.3453,31.4521,-89.5276]}
+        "louisiana":[29.4563,-93.3453,31.4521,-89.5276],
+        "houston": [29.4778611958,-95.975189209,30.1463147381,-94.8889160156]}
 
     dataset = "chennai"
-
-    #slice_data(dataset)
 
     response = ""
     try:
@@ -153,24 +78,27 @@ if __name__ == "__main__":
     except:
         pass
 
+    # This will contain the geo information of location names from OSM
+    geo_info = None
     if "photon" in response:
         # follow the instructions in README to setup photon elasitcsearch index
-        init_using_elasticindex(bbs[dataset], cache=True, dataset=dataset)
+        geo_info = init_using_elasticindex(bbs[dataset], cache=True, dataset=dataset)
     else:
         # init the system using cached data which is the exact effect you would
         #   get by init using elasitcindex.
-        init_using_files(dataset)
+        geo_info = init_using_files(dataset)
 
-    header = [
-        "Spotted_Location",
-        "Location_Offsets",
-        "Geo_Location"]
+    header = [ "Spotted_Location",
+               "Location_Offsets",
+               "Gaz-matched_Location",
+               "Geo_Info_IDs" ]
 
     for tweet in read_tweets(dataset):
         rows = list()
 
         for ln in lnex.extract(tweet):
-            row = ln[0], ln[1], ln[2].title()
+
+            row = ln[0], ln[1], ln[2].title(), ln[3]
             rows.append(row)
 
         print tweet
