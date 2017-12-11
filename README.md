@@ -26,6 +26,7 @@ Following are the steps which allows you to setup and start using LNEx.
    - Gaz-matched_Location: the matched location name from the gazetteer
    - Geo_Info_IDs: the ids of the geo information of the matched Geo_Locations
 
+### Important Files and Directory layout
     .
     ├── _Data                           # where all the cached data resides for testing purposes
     │   ├── Brat_Annotations_Samples    # Contains 50 samples of annotated tweets for the three datasets. Tweets will be read from here to test LNEx.
